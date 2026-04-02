@@ -5,3 +5,4 @@ pytest-cov==5.0.0
 ruff==0.6.9
 black==24.8.0
 isort==5.13.2
+aku-platform-contracts @ git+https://github.com/oumar-code/aku-platform-contracts@v0.1.0
