@@ -76,14 +76,12 @@ async def register_device(
         )
 
     await db.execute(
-        text(
-            """
+        text("""
             INSERT INTO devices
                 (device_id, name, firmware_version, status, capabilities, metadata, registered_at)
             VALUES
                 (:device_id, :name, :fw, :status, :caps, :meta, :registered_at)
-            """
-        ),
+            """),
         {
             "device_id": body.device_id,
             "name": body.name,
@@ -140,8 +138,6 @@ async def get_device(
         metadata=json.loads(record["metadata"]),
         registered_at=datetime.fromisoformat(record["registered_at"]),
         last_seen_at=(
-            datetime.fromisoformat(record["last_seen_at"])
-            if record["last_seen_at"]
-            else None
+            datetime.fromisoformat(record["last_seen_at"]) if record["last_seen_at"] else None
         ),
     )
