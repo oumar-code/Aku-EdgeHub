@@ -2,20 +2,19 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.db.session_sqlite import engine
 from app.main import app
 
 
-@pytest.fixture(scope="session")
-def event_loop() -> asyncio.AbstractEventLoop:
-    """Share one event loop for all tests to avoid cross-loop asyncpg pool reuse."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+@pytest.fixture(autouse=True)
+async def reset_db_pool() -> None:
+    """Avoid cross-loop asyncpg pool reuse between tests."""
+    await engine.dispose()
+    yield
+    await engine.dispose()
 
 
 @pytest.fixture
