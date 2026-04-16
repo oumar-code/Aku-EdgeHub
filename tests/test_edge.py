@@ -70,7 +70,9 @@ async def test_ai_infer_service_unavailable(client: AsyncClient) -> None:
     """Covers the RequestError exception path in ai_infer (edge.py)."""
 
     async def _relay_raise(payload: dict) -> dict:
-        raise httpx.RequestError("service offline")
+        raise httpx.RequestError(
+            "service offline", request=httpx.Request("POST", "http://test/ai")
+        )
 
     with patch("app.services.sync.relay_infer", _relay_raise):
         response = await client.post("/api/v1/ai/infer", json={"prompt": "test"})
