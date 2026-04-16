@@ -54,9 +54,14 @@ async def _ensure_table(db: AsyncSession) -> None:
         raise RuntimeError("Database bind is not available")
 
     dialect_name = bind.dialect.name
-    create_table_sql = (
-        _CREATE_TABLE_POSTGRES if dialect_name == "postgresql" else _CREATE_TABLE_SQLITE
-    )
+    if dialect_name == "postgresql":
+        create_table_sql = _CREATE_TABLE_POSTGRES
+    elif dialect_name == "sqlite":
+        create_table_sql = _CREATE_TABLE_SQLITE
+    else:
+        raise RuntimeError(
+            f"Unsupported database dialect for devices table bootstrap: {dialect_name}"
+        )
     await db.execute(text(create_table_sql))
     await db.commit()
 
