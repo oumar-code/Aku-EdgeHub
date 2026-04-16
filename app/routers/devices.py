@@ -1,4 +1,4 @@
-"""Devices router — registration and lookup against local SQLite store."""
+"""Devices router — registration and lookup against local SQL store."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from app.schemas.devices import (
 
 router = APIRouter(prefix="/api/v1/devices", tags=["devices"])
 
-_CREATE_TABLE = """
+_CREATE_TABLE_SQLITE = """
 CREATE TABLE IF NOT EXISTS devices (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     device_id        TEXT NOT NULL UNIQUE,
@@ -33,9 +33,27 @@ CREATE TABLE IF NOT EXISTS devices (
 )
 """
 
+_CREATE_TABLE_POSTGRES = """
+CREATE TABLE IF NOT EXISTS devices (
+    id               SERIAL PRIMARY KEY,
+    device_id        TEXT NOT NULL UNIQUE,
+    name             TEXT NOT NULL,
+    firmware_version TEXT NOT NULL,
+    status           TEXT NOT NULL DEFAULT 'pending',
+    capabilities     TEXT NOT NULL DEFAULT '[]',
+    metadata         TEXT NOT NULL DEFAULT '{}',
+    registered_at    TEXT NOT NULL,
+    last_seen_at     TEXT
+)
+"""
+
 
 async def _ensure_table(db: AsyncSession) -> None:
-    await db.execute(text(_CREATE_TABLE))
+    dialect_name = db.bind.dialect.name if db.bind is not None else ""
+    create_table_sql = (
+        _CREATE_TABLE_POSTGRES if dialect_name == "postgresql" else _CREATE_TABLE_SQLITE
+    )
+    await db.execute(text(create_table_sql))
     await db.commit()
 
 
@@ -140,8 +158,6 @@ async def get_device(
         metadata=json.loads(record["metadata"]),
         registered_at=datetime.fromisoformat(record["registered_at"]),
         last_seen_at=(
-            datetime.fromisoformat(record["last_seen_at"])
-            if record["last_seen_at"]
-            else None
+            datetime.fromisoformat(record["last_seen_at"]) if record["last_seen_at"] else None
         ),
     )
