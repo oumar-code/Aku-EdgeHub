@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import text
@@ -52,7 +53,7 @@ async def _ensure_table(db: AsyncSession) -> None:
 )
 async def register_device(
     body: DeviceRegisterRequest,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> DeviceRegisterResponse:
     await _ensure_table(db)
 
@@ -114,7 +115,7 @@ async def register_device(
 )
 async def get_device(
     device_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> DeviceRecord:
     await _ensure_table(db)
 
@@ -140,8 +141,6 @@ async def get_device(
         metadata=json.loads(record["metadata"]),
         registered_at=datetime.fromisoformat(record["registered_at"]),
         last_seen_at=(
-            datetime.fromisoformat(record["last_seen_at"])
-            if record["last_seen_at"]
-            else None
+            datetime.fromisoformat(record["last_seen_at"]) if record["last_seen_at"] else None
         ),
     )
