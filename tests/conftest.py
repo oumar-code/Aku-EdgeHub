@@ -11,8 +11,14 @@ from app.main import app
 @pytest.fixture
 async def client() -> AsyncClient:
     """Async HTTP test client bound to the Aku-EdgeHub ASGI app."""
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test",
-    ) as ac:
-        yield ac
+    for handler in app.router.on_startup:
+        await handler()
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as ac:
+            yield ac
+    finally:
+        for handler in app.router.on_shutdown:
+            await handler()
