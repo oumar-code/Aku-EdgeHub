@@ -5,7 +5,16 @@ from __future__ import annotations
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.db.session_sqlite import engine
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+async def reset_db_pool() -> None:
+    """Avoid cross-loop asyncpg pool reuse between tests."""
+    await engine.dispose()
+    yield
+    await engine.dispose()
 
 
 @pytest.fixture
