@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Annotated
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -40,7 +41,9 @@ def _operating_mode() -> OperatingMode:
     response_model=OfflineHealthResponse,
     summary="Offline health check (no external calls)",
 )
-async def offline_health(db: AsyncSession = Depends(get_db)) -> OfflineHealthResponse:
+async def offline_health(
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> OfflineHealthResponse:
     db_reachable = False
     try:
         await db.execute(text("SELECT 1"))
@@ -82,7 +85,9 @@ async def trigger_sync(body: SyncTriggerRequest) -> SyncTriggerResponse:
     response_model=CacheStatusResponse,
     summary="Local SQLite content cache status",
 )
-async def cache_status(db: AsyncSession = Depends(get_db)) -> CacheStatusResponse:
+async def cache_status(
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> CacheStatusResponse:
     # Item count — table may not exist yet on a fresh node
     try:
         row = await db.execute(text("SELECT COUNT(*) FROM content_cache"))
