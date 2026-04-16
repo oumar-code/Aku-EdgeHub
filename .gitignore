@@ -26,3 +26,4 @@ htmlcov/
 # Docker
 *.log
 edge_hub.db
+*.db

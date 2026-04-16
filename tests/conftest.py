@@ -8,7 +8,7 @@ from httpx import ASGITransport, AsyncClient
 from app.main import app
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 async def client() -> AsyncClient:
     """Async HTTP test client bound to the Aku-EdgeHub ASGI app."""
     async with AsyncClient(
