@@ -63,7 +63,6 @@ async def _ensure_table(db: AsyncSession) -> None:
             f"Unsupported database dialect for devices table bootstrap: {dialect_name}"
         )
     await db.execute(text(create_table_sql))
-    await db.commit()
 
 
 # ---------------------------------------------------------------------------
