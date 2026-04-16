@@ -98,9 +98,7 @@ async def cache_status(
     # Last sync timestamp
     last_sync_at: datetime | None = None
     try:
-        row = await db.execute(
-            text("SELECT MAX(synced_at) FROM content_cache")
-        )
+        row = await db.execute(text("SELECT MAX(synced_at) FROM content_cache"))
         value = row.scalar_one()
         if value:
             last_sync_at = datetime.fromisoformat(value)
