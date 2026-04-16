@@ -29,7 +29,14 @@ pythonpath = ["."]
 
 [tool.coverage.run]
 source = ["app"]
-omit = ["tests/*"]
+omit = [
+    "tests/*",
+    # Legacy/dead files not imported by the active application
+    "app/config.py",
+    "app/db/base.py",
+    "app/db/session.py",
+    "app/routers/health.py",
+]
 
 [tool.coverage.report]
 show_missing = true
