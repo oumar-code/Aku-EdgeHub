@@ -49,7 +49,11 @@ CREATE TABLE IF NOT EXISTS devices (
 
 
 async def _ensure_table(db: AsyncSession) -> None:
-    dialect_name = db.bind.dialect.name if db.bind is not None else ""
+    bind = db.get_bind()
+    if bind is None:
+        raise RuntimeError("Database bind is not available")
+
+    dialect_name = bind.dialect.name
     create_table_sql = (
         _CREATE_TABLE_POSTGRES if dialect_name == "postgresql" else _CREATE_TABLE_SQLITE
     )
