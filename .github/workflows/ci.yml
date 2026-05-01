@@ -9,20 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: aku
-          POSTGRES_PASSWORD: aku
-          POSTGRES_DB: aku_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - uses: actions/checkout@v4
@@ -47,9 +33,6 @@ jobs:
         run: black --check .
 
       - name: Run tests
-        env:
-          DATABASE_URL: postgresql+asyncpg://aku:aku@localhost:5432/aku_test
-          JWT_SECRET_KEY: test-secret-key
         run: pytest --cov=app --cov-report=xml -v
 
   docker:
@@ -58,4 +41,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker image
-        run: docker build -t aku/aku-edgehub:${{ github.sha }} .
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          docker build \
+            --secret id=GH_PAT,env=GH_PAT \
+            -t aku/aku-edgehub:${{ github.sha }} .
