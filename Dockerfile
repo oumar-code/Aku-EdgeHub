@@ -19,10 +19,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt requirements-extra.txt ./
 
-RUN pip install --upgrade pip --no-cache-dir \
+RUN pip install --upgrade pip --no-cache-dir
+
+# Mount the GH_PAT secret (injected by `docker build --secret id=GH_PAT,env=GH_PAT`)
+# so pip can clone the private aku-platform-contracts package from GitHub.
+# The secret is only available during this layer and is never baked into the image.
+RUN --mount=type=secret,id=GH_PAT \
+    printf 'machine github.com\nlogin x-access-token\npassword %s\n' \
+        "$(cat /run/secrets/GH_PAT)" > /root/.netrc \
  && pip install --prefix=/install --no-cache-dir \
         -r requirements.txt \
-        -r requirements-extra.txt
+        -r requirements-extra.txt \
+ && rm -f /root/.netrc
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────────────
 FROM python:3.11-slim AS runtime

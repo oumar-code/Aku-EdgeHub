@@ -32,11 +32,6 @@ pythonpath = ["."]
 source = ["app"]
 omit = [
     "tests/*",
-    # Legacy/dead files not imported by the active application
-    "app/config.py",
-    "app/db/base.py",
-    "app/db/session.py",
-    "app/routers/health.py",
 ]
 
 [tool.coverage.report]
