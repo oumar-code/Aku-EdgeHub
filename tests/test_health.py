@@ -18,7 +18,7 @@ async def test_health_response_body(client: AsyncClient) -> None:
 
 
 async def test_openapi_schema_accessible(client: AsyncClient) -> None:
-    response = await client.get("/openapi.json")
+    response = await client.get("/api/openapi.json")
     assert response.status_code == 200
     schema = response.json()
     assert schema["info"]["title"] == "Aku-EdgeHub"
