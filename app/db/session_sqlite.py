@@ -39,6 +39,8 @@ async def init_db() -> None:
     """Create all tables on startup (SQLite schema bootstrap)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    # Avoid reusing startup-loop pooled connections in request/test loops.
+    await engine.dispose()
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
